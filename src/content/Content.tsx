@@ -1,4 +1,5 @@
-import React, { ReactElement, useState } from 'react';
+/* eslint-disable react/react-in-jsx-scope */
+import React, { useState } from 'react';
 import { MdDone, MdOutlineContentCopy, MdVolumeUp } from 'react-icons/md';
 import { getBucket } from '@extend-chrome/storage';
 import {
