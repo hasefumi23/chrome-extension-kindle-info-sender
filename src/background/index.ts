@@ -8,29 +8,28 @@ interface MyBucket {
 
 const bucket = getBucket<MyBucket>('my_bucket', 'sync');
 
+/**
+ * ブラウザ起動時に実行される
+ * コンテキストメニューに「」メニューを追加する
+ * @see https://developer.chrome.com/docs/extensions/reference/contextMenus/#type-ContextType
+ */
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: 'translation',
-    title: '選択したテキストを翻訳',
-    contexts: ['selection'],
+    id: 'watch-kindle',
+    title: 'Kindle価格をウォッチする',
+    contexts: ['all'],
   });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  console.log('context menu is clicked');
   if (tab !== undefined) {
+    console.log('in if 1');
     switch (info.menuItemId) {
-      case 'translation': {
-        const selectedText = info.selectionText !== undefined ? info.selectionText : '';
-        const value = await bucket.get();
-        const userTargetLang = value.targetLang ?? 'EN';
-        const translatedText = await translate(selectedText, userTargetLang);
+      case 'watch-kindle': {
+        console.log('in watch-kindle');
         chrome.tabs.sendMessage(tab.id as number, {
           type: 'SHOW',
-          data: {
-            lang: userTargetLang,
-            translatedText,
-            originalText: selectedText,
-          },
         });
         break;
       }
@@ -44,9 +43,6 @@ chrome.runtime.onMessage.addListener(async function (message, sender, sendRespon
     const value = await bucket.get();
     const userTargetLang = value.targetLang ?? 'EN';
     const translatedText = await translate(selectedText, userTargetLang);
-    console.log('TRANSLATE listener is called');
-    console.log(`originalText: ${selectedText}`);
-    console.log(`transtedText: ${translatedText}`);
     chrome.tabs.sendMessage(sender.tab?.id as number, {
       type: 'SHOW',
       data: {
