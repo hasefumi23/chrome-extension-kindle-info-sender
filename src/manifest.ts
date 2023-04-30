@@ -10,7 +10,7 @@ const manifest: ManifestV3Export = {
   },
   content_scripts: [
     {
-      matches: ['http://*/*', 'https://*/*', 'file:///*'],
+      matches: ['https://zenn.dev/*', 'https://www.amazon.co.jp/*'],
       js: ['src/content/index.tsx'],
     },
   ],
@@ -25,7 +25,7 @@ const manifest: ManifestV3Export = {
         // this file is web accessible; it supports HMR b/c it's declared in `rollupOptions.input`
         'src/welcome/welcome.html',
       ],
-      matches: ['<all_urls>'],
+      matches: ['https://zenn.dev/*', 'https://www.amazon.co.jp/*'],
     },
   ],
   action: {
@@ -43,7 +43,7 @@ const manifest: ManifestV3Export = {
     '48': 'images/extension_48.png',
     '128': 'images/extension_128.png',
   },
-  permissions: ['storage', 'tabs', 'contextMenus'],
+  permissions: ['storage', 'tabs', 'contextMenus', 'webRequest'],
 };
 
 export default manifest;

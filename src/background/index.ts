@@ -21,37 +21,52 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+chrome.contextMenus.onClicked.addListener((info, tab) => {
   console.log('context menu is clicked');
   if (tab !== undefined) {
-    console.log('in if 1');
     switch (info.menuItemId) {
       case 'watch-kindle': {
         console.log('in watch-kindle');
         chrome.tabs.sendMessage(tab.id as number, {
           type: 'SHOW',
         });
+        console.log('[background] after sendMessage');
         break;
       }
     }
   }
 });
 
-chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
-  if (message.type === 'TRANSLATE') {
-    const selectedText = message.data.selectedText ?? '';
-    const value = await bucket.get();
-    const userTargetLang = value.targetLang ?? 'EN';
-    const translatedText = await translate(selectedText, userTargetLang);
-    chrome.tabs.sendMessage(sender.tab?.id as number, {
-      type: 'SHOW',
-      data: {
-        lang: userTargetLang,
-        translatedText,
-        originalText: selectedText,
-      },
-    });
+// FIXME: 定義箇所を移動する
+const API_URL = 'https://sandbox-cloudflare.hasefumi232694.workers.dev/books';
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  console.log(`[background] message is ${JSON.stringify(message)}`);
+  if (message.type === 'POST_BOOK') {
+    (async () => {
+      console.log('[background] request POST_BOOK');
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + 'hasefumi23',
+        },
+        mode: 'cors',
+        body: JSON.stringify({
+          isbn: message.data.asin,
+          basePrice: message.data.basePrice,
+          title: message.data.title,
+          url: message.data.url,
+        }),
+      });
+      console.log('[background] recieve POST_BOOK');
+      sendResponse({
+        ok: res.ok,
+        status: res.status,
+        data: res.ok ? await res.json() : null,
+      });
+    })();
   }
+
+  return true;
 });
 
 export {};

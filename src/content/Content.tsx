@@ -1,15 +1,42 @@
 /* eslint-disable react/react-in-jsx-scope */
 import { useCallback, useState } from 'react';
-import { Box, Button, Flex, Group, Input, Text } from '@mantine/core';
+import { Box, Button, Divider, Flex, Input, Text } from '@mantine/core';
 import { useClickOutside, useEventListener } from '@mantine/hooks';
 
-export const Content = ({ kindlePrice }: { kindlePrice: string }) => {
+export const Content = ({
+  asin,
+  title,
+  url,
+  basePrice,
+}: {
+  asin: string;
+  title: string;
+  url: string;
+  basePrice: string;
+}) => {
   const [opened, setOpened] = useState(true);
   const [dialog, setDialog] = useState<HTMLDivElement | null>(null);
   useClickOutside(() => setOpened(false), null, [dialog]);
-  const [basePrice, setBasePrice] = useState(kindlePrice);
+  const [inputBasePrice, setInputBasePrice] = useState(basePrice);
+  const [result, setRsesult] = useState('none');
 
-  const sender = useCallback(() => console.log(`basePrice is ${basePrice}`), [basePrice]);
+  const sender = useCallback(() => {
+    chrome.runtime.sendMessage(
+      {
+        type: 'POST_BOOK',
+        data: {
+          basePrice: inputBasePrice,
+          title,
+          asin,
+          url,
+        },
+      },
+      (res) => {
+        console.log(`[content] res is ${res}`);
+        setRsesult(res.ok ? 'success' : 'error');
+      }
+    );
+  }, [inputBasePrice, title, asin, url]);
   const ref = useEventListener('click', sender);
 
   return opened ? (
@@ -27,11 +54,21 @@ export const Content = ({ kindlePrice }: { kindlePrice: string }) => {
     >
       <Text size="md">設定価格: </Text>
       <Flex>
-        <Input value={basePrice} onChange={(e) => setBasePrice(e.currentTarget.value)} />
+        <Input value={inputBasePrice} onChange={(e) => setInputBasePrice(e.currentTarget.value)} />
         <Button ref={ref}>送信</Button>
       </Flex>
+      <ResultText result={result} />
     </Box>
   ) : (
     <></>
   );
+};
+
+const ResultText = ({ result }: { result: string }) => {
+  if (result === 'success') {
+    return <Text>success.</Text>;
+  } else if (result === 'error') {
+    return <Text>error.</Text>;
+  }
+  return <></>;
 };

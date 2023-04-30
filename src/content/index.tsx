@@ -4,13 +4,15 @@ import { createRoot } from 'react-dom/client';
 import { Content } from './Content';
 
 const Main = ({
-  translatedText,
-  originalText,
-  targetLang,
+  asin,
+  url,
+  basePrice,
+  title,
 }: {
-  translatedText: string;
-  originalText: string;
-  targetLang: string;
+  asin: string;
+  url: string;
+  basePrice: string;
+  title: string;
 }) => {
   return (
     <div
@@ -31,32 +33,34 @@ const Main = ({
           zIndex: 2147483550,
         }}
       >
-        <Content kindlePrice={translatedText} originalText={originalText} targetLang={targetLang} />
+        <Content basePrice={basePrice} asin={asin} url={url} title={title} />
       </div>
     </div>
   );
 };
 
-chrome.runtime.onMessage.addListener(async function (message, _sender, _sendResponse) {
+chrome.runtime.onMessage.addListener(function (message, _sender, _sendResponse) {
   console.log('add listener is called');
   if (message.type === 'SHOW') {
-    const kindlePrice = document
-      .getElementById('kindle-price')
-      ?.textContent?.replace(/[^0-9]/g, '');
-    console.log(`kindle price: ${kindlePrice}`);
-
-    const selection = window.getSelection();
-    if (selection !== undefined && selection !== null && selection.toString() !== undefined) {
-      const container = document.createElement('my-extension-root');
-      document.body.after(container);
-      console.log('before render');
-      createRoot(container).render(
-        <Main
-          translatedText={kindlePrice?.toString() || 'null string'}
-          originalText={kindlePrice?.toString() || 'null string'}
-          targetLang={kindlePrice?.toString() || 'null string'}
-        />
-      );
-    }
+    const book = buildBook();
+    const container = document.createElement('my-extension-root');
+    document.body.after(container);
+    console.log('before render');
+    createRoot(container).render(
+      <Main basePrice={book.basePrice} url={book.url} asin={book.asin} title={book.title} />
+    );
   }
 });
+
+function buildBook(): { asin: string; url: string; basePrice: string; title: string } {
+  const kindlePrice =
+    document.getElementById('kindle-price')?.textContent?.replace(/[^0-9]/g, '') || '';
+  console.log(`kindle price: ${kindlePrice}`);
+  const asinElement = document.querySelector(
+    '#ASIN, input[name="idx.asin"], input[name="ASIN.0"], input[name="titleID"]'
+  );
+  const asinVal = asinElement?.getAttribute('value') || '';
+  const title = document.getElementById('productTitle')?.textContent?.trim() || '';
+  const url = `https://www.amazon.co.jp/dp/${asinVal}`;
+  return { asin: asinVal, title: title, url, basePrice: kindlePrice };
+}
