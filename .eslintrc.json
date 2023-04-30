@@ -8,7 +8,8 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
     "react-app",
-    "react-app/jest"
+    "react-app/jest",
+    "prettier"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -29,7 +30,8 @@
     "@typescript-eslint/no-unused-expressions": 2,
     "@typescript-eslint/triple-slash-reference": "off",
     "simple-import-sort/imports": "error",
-    "simple-import-sort/exports": "error"
+    "simple-import-sort/exports": "error",
+    "quotes": ["error", "single"]
   },
 
   "overrides": [
