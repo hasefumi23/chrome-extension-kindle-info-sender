@@ -1,3 +1,14 @@
+## TODO
+
+- [ ] 価格などの情報を送信する
+- [ ] 送信が完了したことをユーザーに通知する
+  - [ ] 正常終了
+    - [ ] 正常に完了したことを通知する
+  - [ ] 異常終了
+    - [ ] エラーが発生したことを通知する
+
+## Overview
+
 <div align="center">
   <br>
  <img src="https://raw.githubusercontent.com/sinanbekar/browser-extension-react-typescript-starter/main/public/images/extension_128.png" alt="Browser Extension React & TypeScript Starter" width="128">
